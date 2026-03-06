@@ -52,8 +52,8 @@ export function Navbar() {
                 className={cn(
                   "px-5 py-2 text-sm font-medium rounded-full transition-all",
                   i === 2
-                    ? "bg-stone-900 text-white shadow-sm"
-                    : "text-stone-500 hover:text-stone-700"
+                    ? "bg-sand-600 text-white shadow-sm shadow-sand-600/20"
+                    : "text-stone-500 hover:text-sand-700"
                 )}
               >
                 {tab}
@@ -69,7 +69,7 @@ export function Navbar() {
               <ChevronDown className="w-3.5 h-3.5" />
             </button>
 
-            <button className="h-10 px-6 text-sm font-semibold text-white bg-stone-900 rounded-full hover:bg-stone-800 active:scale-[0.97] transition-all shadow-sm">
+            <button className="h-10 px-6 text-sm font-semibold text-white bg-sand-600 rounded-full hover:bg-sand-700 active:scale-[0.97] transition-all shadow-sm shadow-sand-600/20">
               Login
             </button>
           </div>

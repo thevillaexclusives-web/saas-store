@@ -44,14 +44,14 @@ export function CategoryBar({
                 className={cn(
                   "flex items-center gap-2.5 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all shrink-0",
                   isActive
-                    ? "bg-stone-900 text-white shadow-md shadow-stone-900/20"
-                    : "bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-800"
+                    ? "bg-sand-600 text-white shadow-md shadow-sand-600/20"
+                    : "bg-stone-100 text-stone-600 hover:bg-sand-50 hover:text-sand-800"
                 )}
               >
                 <Icon
                   className={cn(
                     "w-4 h-4",
-                    isActive ? "text-sand-300" : "text-stone-400"
+                    isActive ? "text-white/70" : "text-stone-400"
                   )}
                 />
                 <span>{cat.name}</span>
