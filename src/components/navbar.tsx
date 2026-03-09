@@ -69,9 +69,12 @@ export function Navbar() {
               <ChevronDown className="w-3.5 h-3.5" />
             </button>
 
-            <button className="h-10 px-6 text-sm font-semibold text-white bg-sand-600 rounded-full hover:bg-sand-700 active:scale-[0.97] transition-all shadow-sm shadow-sand-600/20">
+            <a
+              href={`${process.env.NEXT_PUBLIC_PLATFORM_URL}/login`}
+              className="inline-flex items-center h-10 px-6 text-sm font-semibold text-white bg-sand-600 rounded-full hover:bg-sand-700 active:scale-[0.97] transition-all shadow-sm shadow-sand-600/20"
+            >
               Login
-            </button>
+            </a>
           </div>
         </div>
       </div>
