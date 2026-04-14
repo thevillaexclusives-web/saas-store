@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import "./globals.css";
+import "mapbox-gl/dist/mapbox-gl.css";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -9,9 +10,9 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "VillaHub — Luxury Property Rentals",
+  title: "Villa Storefront",
   description:
-    "Discover handpicked luxury villas, apartments, and homes in the world's most desirable destinations.",
+    "Discover published property collections from your selected organization storefront.",
 };
 
 export default function RootLayout({

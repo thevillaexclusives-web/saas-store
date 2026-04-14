@@ -41,6 +41,17 @@
 :root {
   --background: #f8f7f5;
   --foreground: #1c1917;
+  --storefront-primary: #96693a;
+  --storefront-primary-foreground: #ffffff;
+  --storefront-primary-hover: #7a5232;
+  --storefront-primary-active: #5e3e2b;
+  --storefront-primary-soft: rgba(150, 105, 58, 0.12);
+  --storefront-primary-soft-strong: rgba(150, 105, 58, 0.18);
+  --storefront-primary-border: rgba(150, 105, 58, 0.28);
+  --storefront-secondary: #ffffff;
+  --storefront-secondary-foreground: #111111;
+  --storefront-secondary-surface: #fafafa;
+  --storefront-secondary-surface-strong: #f3f3f3;
 }
 
 * {

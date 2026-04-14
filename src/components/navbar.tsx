@@ -1,59 +1,99 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Search, ChevronDown, Globe } from "lucide-react";
+import { normalizeStorefrontBranding } from "@/lib/storefront/branding";
+import type { StorefrontBranding } from "@/lib/storefront/types";
 import { cn } from "@/lib/utils";
 
 const navTabs = ["Buy", "Sell", "Rent"] as const;
 
-export function Navbar() {
+function brandInitials(name: string) {
+  const initials = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+
+  return initials || "VH";
+}
+
+export function Navbar({
+  homeHref = "/",
+  branding,
+}: {
+  homeHref?: string;
+  branding?: StorefrontBranding;
+}) {
+  const brand = normalizeStorefrontBranding(branding);
+  const showLogo = brand.brandDisplay !== "name_only" && Boolean(brand.logoUrl);
+  const showFallbackIcon = brand.brandDisplay === "logo_and_name" && !brand.logoUrl;
+  const showName = brand.brandDisplay !== "logo_only" || !brand.logoUrl;
+
   return (
-    <header className="sticky top-0 z-50 bg-surface/80 backdrop-blur-xl border-b border-border-subtle">
+    <header className="sticky top-0 z-50 border-b border-border-subtle bg-[var(--storefront-secondary-surface)] backdrop-blur-xl">
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
         <div className="flex h-[72px] items-center justify-between gap-6">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-sand-500 to-sand-700 shadow-sm">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                className="w-5 h-5 text-white"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <polyline points="9 22 9 12 15 12 15 22" />
-              </svg>
-            </div>
-            <span className="text-xl font-bold tracking-tight text-stone-900">
-              Villa<span className="text-sand-600">Hub</span>
-            </span>
+          <Link href={homeHref} className="flex items-center gap-2 shrink-0">
+            {showLogo ? (
+              <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden sm:h-16 sm:w-16">
+                <Image
+                  src={brand.logoUrl!}
+                  alt={`${brand.name} logo`}
+                  fill
+                  sizes="(max-width: 640px) 56px, 64px"
+                  className="object-contain"
+                />
+              </div>
+            ) : showFallbackIcon ? (
+              <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-[var(--storefront-primary)] shadow-sm">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="w-5 h-5 text-[var(--storefront-primary-foreground)]"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                <span className="sr-only">{brandInitials(brand.name)}</span>
+              </div>
+            ) : null}
+            {showName ? (
+              <span className="text-xl font-bold tracking-tight text-stone-900">{brand.name}</span>
+            ) : (
+              <span className="sr-only">{brand.name}</span>
+            )}
           </Link>
 
           {/* Search bar */}
           <div className="hidden md:flex flex-1 max-w-xl">
             <div className="relative w-full group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-stone-400 transition-colors group-focus-within:text-sand-600" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-stone-400 transition-colors group-focus-within:text-[var(--storefront-primary)]" />
               <input
                 type="text"
                 placeholder="Search destinations, properties..."
-                className="w-full h-11 pl-11 pr-4 bg-stone-50 border border-border-subtle rounded-full text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-sand-300/50 focus:border-sand-300 focus:bg-white transition-all"
+                className="w-full h-11 rounded-full border border-border-subtle bg-[var(--storefront-secondary-surface-strong)] pl-11 pr-4 text-sm text-stone-800 placeholder:text-stone-400 transition-all focus:border-[var(--storefront-primary-border)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--storefront-primary-soft)]"
               />
             </div>
           </div>
 
           {/* Navigation tabs */}
-          <nav className="hidden lg:flex items-center bg-stone-100 rounded-full p-1">
+          <nav className="hidden lg:flex items-center rounded-full bg-[var(--storefront-secondary-surface-strong)] p-1">
             {navTabs.map((tab, i) => (
               <button
                 key={tab}
                 className={cn(
                   "px-5 py-2 text-sm font-medium rounded-full transition-all",
                   i === 2
-                    ? "bg-sand-600 text-white shadow-sm shadow-sand-600/20"
-                    : "text-stone-500 hover:text-sand-700"
+                    ? "bg-[var(--storefront-primary)] text-[var(--storefront-primary-foreground)] shadow-sm"
+                    : "text-stone-500 hover:text-[var(--storefront-primary)]"
                 )}
               >
                 {tab}
@@ -71,7 +111,7 @@ export function Navbar() {
 
             <a
               href={`${process.env.NEXT_PUBLIC_PLATFORM_URL}/login`}
-              className="inline-flex items-center h-10 px-6 text-sm font-semibold text-white bg-sand-600 rounded-full hover:bg-sand-700 active:scale-[0.97] transition-all shadow-sm shadow-sand-600/20"
+              className="inline-flex h-10 items-center rounded-full bg-[var(--storefront-primary)] px-6 text-sm font-semibold text-[var(--storefront-primary-foreground)] transition-all hover:bg-[var(--storefront-primary-hover)] active:scale-[0.97]"
             >
               Login
             </a>

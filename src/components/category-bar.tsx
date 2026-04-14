@@ -9,7 +9,7 @@ import {
   Warehouse,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { categories } from "@/lib/mock-data";
+import type { StorefrontCategory } from "@/lib/storefront/types";
 
 const iconMap: Record<string, React.ElementType> = {
   "layout-grid": LayoutGrid,
@@ -21,11 +21,13 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 interface CategoryBarProps {
+  categories: StorefrontCategory[];
   activeCategory: string;
   onCategoryChange: (category: string) => void;
 }
 
 export function CategoryBar({
+  categories,
   activeCategory,
   onCategoryChange,
 }: CategoryBarProps) {
@@ -44,21 +46,25 @@ export function CategoryBar({
                 className={cn(
                   "flex items-center gap-2.5 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all shrink-0",
                   isActive
-                    ? "bg-sand-600 text-white shadow-md shadow-sand-600/20"
-                    : "bg-stone-100 text-stone-600 hover:bg-sand-50 hover:text-sand-800"
+                    ? "bg-[var(--storefront-primary)] text-[var(--storefront-primary-foreground)] shadow-md"
+                    : "bg-[var(--storefront-secondary-surface-strong)] text-stone-600 hover:bg-[var(--storefront-primary-soft)] hover:text-[var(--storefront-primary)]"
                 )}
               >
                 <Icon
                   className={cn(
                     "w-4 h-4",
-                    isActive ? "text-white/70" : "text-stone-400"
+                    isActive
+                      ? "text-[var(--storefront-primary-foreground)] opacity-70"
+                      : "text-stone-400"
                   )}
                 />
                 <span>{cat.name}</span>
                 <span
                   className={cn(
                     "text-xs tabular-nums",
-                    isActive ? "text-stone-400" : "text-stone-400"
+                    isActive
+                      ? "text-[var(--storefront-primary-foreground)] opacity-70"
+                      : "text-stone-400"
                   )}
                 >
                   {cat.count}

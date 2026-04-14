@@ -4,12 +4,16 @@ import { LayoutGrid, List, SlidersHorizontal, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ListingHeaderProps {
+  title: string;
+  locationLabel: string;
   resultCount: number;
   viewMode: "grid" | "list";
   onViewModeChange: (mode: "grid" | "list") => void;
 }
 
 export function ListingHeader({
+  title,
+  locationLabel,
   resultCount,
   viewMode,
   onViewModeChange,
@@ -18,14 +22,13 @@ export function ListingHeader({
     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <MapPin className="w-4 h-4 text-sand-500" />
+          <MapPin className="w-4 h-4 text-[var(--storefront-primary)]" />
           <span className="text-sm text-stone-500 font-medium">
-            Dubai City
+            {locationLabel}
           </span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold text-stone-900 tracking-tight leading-tight">
-          Dubai City, Jumeirah
-          <span className="text-sand-500"> Villa</span>
+          {title}
         </h1>
         <p className="mt-2 text-stone-500 text-[15px]">
           <span className="font-semibold text-stone-700 tabular-nums">

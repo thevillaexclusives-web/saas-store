@@ -18,7 +18,7 @@ import {
   Sun,
   Wine,
 } from "lucide-react";
-import type { Amenity } from "@/lib/mock-data";
+import type { Amenity } from "@/lib/storefront/types";
 
 const iconMap: Record<string, React.ElementType> = {
   waves: Waves,
@@ -56,8 +56,8 @@ export function AmenitiesGrid({ amenities }: AmenitiesGridProps) {
               key={amenity.name}
               className="flex items-center gap-3 py-1"
             >
-              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-sand-50 shrink-0">
-                <Icon className="w-[18px] h-[18px] text-sand-600" />
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[var(--storefront-primary-soft)] shrink-0">
+                <Icon className="w-[18px] h-[18px] text-[var(--storefront-primary)]" />
               </div>
               <span className="text-sm text-stone-700 font-medium">
                 {amenity.name}

@@ -3,20 +3,24 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Star, Users, BedDouble, Heart } from "lucide-react";
+import { storefrontPropertyPath } from "@/lib/storefront/resolver";
 import { cn } from "@/lib/utils";
-import type { Property } from "@/lib/mock-data";
+import type { StorefrontProperty } from "@/lib/storefront/types";
 
 interface PropertyCardProps {
-  property: Property;
+  property: StorefrontProperty;
   index: number;
+  orgSlug: string;
+  storeSlug: string;
 }
 
-export function PropertyCard({ property, index }: PropertyCardProps) {
+export function PropertyCard({ property, index, orgSlug, storeSlug }: PropertyCardProps) {
   const staggerClass = `stagger-${Math.min(index + 1, 9)}`;
+  const roundedRating = property.rating != null ? Math.round(property.rating) : 0;
 
   return (
     <Link
-      href={`/property/${property.id}`}
+      href={storefrontPropertyPath({ orgSlug, storeSlug, propertyId: property.id })}
       className={cn(
         "property-card group relative block bg-surface rounded-2xl overflow-hidden border border-border-subtle/60 hover:border-stone-200 hover:shadow-lg hover:shadow-stone-200/50 transition-all duration-300 card-enter",
         staggerClass
@@ -50,7 +54,7 @@ export function PropertyCard({ property, index }: PropertyCardProps) {
         {/* Featured badge */}
         {property.isFeatured && (
           <div className="absolute bottom-3.5 left-3.5">
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-sand-500 rounded-full text-[11px] font-bold text-white uppercase tracking-wider shadow-md">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--storefront-primary)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[var(--storefront-primary-foreground)] shadow-md">
               <svg
                 viewBox="0 0 12 12"
                 fill="currentColor"
@@ -67,7 +71,7 @@ export function PropertyCard({ property, index }: PropertyCardProps) {
       {/* Content */}
       <div className="p-4 sm:p-5">
         {/* Name */}
-        <h3 className="font-semibold text-stone-900 text-[15px] leading-snug line-clamp-2 mb-2 group-hover:text-sand-700 transition-colors">
+        <h3 className="font-semibold text-stone-900 text-[15px] leading-snug line-clamp-2 mb-2 transition-colors group-hover:text-[var(--storefront-primary)]">
           {property.name}
         </h3>
 
@@ -88,36 +92,53 @@ export function PropertyCard({ property, index }: PropertyCardProps) {
         {/* Price & Rating */}
         <div className="flex items-end justify-between pt-3 border-t border-stone-100">
           <div>
-            <span className="text-xs text-stone-400 font-medium">from</span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-xl font-bold text-stone-900 tabular-nums tracking-tight">
-                {property.price.toLocaleString()}
-              </span>
-              <span className="text-sm font-medium text-stone-500">
-                {property.currency}
-              </span>
-            </div>
+            {property.price != null ? (
+              <>
+                <span className="text-xs text-stone-400 font-medium">from</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-xl font-bold text-stone-900 tabular-nums tracking-tight">
+                    {property.price.toLocaleString()}
+                  </span>
+                  <span className="text-sm font-medium text-stone-500">
+                    {property.currency}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <span className="text-xs text-stone-400 font-medium">pricing</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-base font-semibold text-stone-900">
+                    On request
+                  </span>
+                </div>
+              </>
+            )}
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <span className="text-sm font-semibold text-stone-700 tabular-nums">
-              {property.rating.toFixed(1)}
-            </span>
-            <div className="flex gap-0.5">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  className={cn(
-                    "w-3.5 h-3.5 star-animate",
-                    i < Math.round(property.rating)
-                      ? "fill-amber-400 text-amber-400"
-                      : "fill-stone-200 text-stone-200"
-                  )}
-                  style={{ animationDelay: `${0.3 + i * 0.06}s` }}
-                />
-              ))}
+          {property.rating != null ? (
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-semibold text-stone-700 tabular-nums">
+                {property.rating.toFixed(1)}
+              </span>
+              <div className="flex gap-0.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    className={cn(
+                      "w-3.5 h-3.5 star-animate",
+                      i < roundedRating
+                        ? "fill-amber-400 text-amber-400"
+                        : "fill-stone-200 text-stone-200"
+                    )}
+                    style={{ animationDelay: `${0.3 + i * 0.06}s` }}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="text-sm font-medium text-stone-400">New listing</div>
+          )}
         </div>
       </div>
     </Link>

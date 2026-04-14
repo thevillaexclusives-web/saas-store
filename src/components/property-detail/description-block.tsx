@@ -24,7 +24,7 @@ export function DescriptionBlock({ description }: DescriptionBlockProps) {
       {description.length > 200 && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-sand-700 hover:text-sand-800 transition-colors"
+          className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[var(--storefront-primary)] transition-colors hover:text-[var(--storefront-primary-hover)]"
         >
           {expanded ? "Show less" : "Show more"}
           <ChevronDown

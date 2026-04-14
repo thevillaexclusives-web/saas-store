@@ -1,13 +1,23 @@
 "use client";
 
 import { PropertyCard } from "./property-card";
-import type { Property } from "@/lib/mock-data";
+import type { StorefrontProperty } from "@/lib/storefront/types";
 
 interface PropertyGridProps {
-  properties: Property[];
+  properties: StorefrontProperty[];
+  orgSlug: string;
+  storeSlug: string;
+  emptyTitle?: string;
+  emptyDescription?: string;
 }
 
-export function PropertyGrid({ properties }: PropertyGridProps) {
+export function PropertyGrid({
+  properties,
+  orgSlug,
+  storeSlug,
+  emptyTitle = "No properties found",
+  emptyDescription = "Try adjusting your filters or browse all categories to discover available listings.",
+}: PropertyGridProps) {
   if (properties.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -25,11 +35,10 @@ export function PropertyGrid({ properties }: PropertyGridProps) {
           </svg>
         </div>
         <h3 className="text-lg font-semibold text-stone-800 mb-1">
-          No properties found
+          {emptyTitle}
         </h3>
         <p className="text-sm text-stone-500 max-w-sm">
-          Try adjusting your filters or browsing all categories to discover
-          available listings.
+          {emptyDescription}
         </p>
       </div>
     );
@@ -38,7 +47,13 @@ export function PropertyGrid({ properties }: PropertyGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
       {properties.map((property, i) => (
-        <PropertyCard key={property.id} property={property} index={i} />
+        <PropertyCard
+          key={property.id}
+          property={property}
+          index={i}
+          orgSlug={orgSlug}
+          storeSlug={storeSlug}
+        />
       ))}
     </div>
   );
