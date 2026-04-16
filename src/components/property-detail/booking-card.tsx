@@ -1,8 +1,12 @@
 "use client";
 
-import { CalendarDays, ChevronDown, Star } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { CalendarDays, Star } from "lucide-react";
 
 interface BookingCardProps {
+  orgSlug: string;
+  storeSlug: string;
+  propertyId: string;
   price: number | null;
   currency: string;
   period: string;
@@ -10,34 +14,172 @@ interface BookingCardProps {
   reviewCount: number | null;
 }
 
+interface QuoteResponse {
+  available: boolean;
+  currency: string;
+  quote: {
+    nights: number;
+    nightlySubtotal: number;
+    feesTotal: number;
+    taxTotal: number;
+    discountTotal: number;
+    totalAmount: number;
+  };
+}
+
+function dateInput(offsetDays: number) {
+  const date = new Date();
+  date.setDate(date.getDate() + offsetDays);
+  return date.toISOString().slice(0, 10);
+}
+
+function money(value: number, currency: string) {
+  return `${value.toLocaleString(undefined, {
+    maximumFractionDigits: 2,
+  })} ${currency}`;
+}
+
 export function BookingCard({
+  orgSlug,
+  storeSlug,
+  propertyId,
   price,
   currency,
   period,
   rating,
   reviewCount,
 }: BookingCardProps) {
-  const nights = 5;
-  const nightlyPrice = price ?? 0;
-  const subtotal = nightlyPrice * nights;
-  const cleaningFee = Math.round(nightlyPrice * 0.15);
-  const serviceFee = Math.round(subtotal * 0.08);
-  const total = subtotal + cleaningFee + serviceFee;
+  const [startDate, setStartDate] = useState(dateInput(1));
+  const [endDate, setEndDate] = useState(dateInput(6));
+  const [adults, setAdults] = useState("2");
+  const [children, setChildren] = useState("0");
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
+  const [guestNotes, setGuestNotes] = useState("");
+  const [quote, setQuote] = useState<QuoteResponse | null>(null);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [isChecking, setIsChecking] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const availabilityUrl = useMemo(() => {
+    const params = new URLSearchParams({
+      start: startDate,
+      end: endDate,
+      adults,
+      children,
+    });
+
+    return `/api/storefront/${orgSlug}/store/${storeSlug}/property/${propertyId}/availability?${params.toString()}`;
+  }, [adults, children, endDate, orgSlug, propertyId, startDate, storeSlug]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkAvailability() {
+      if (!startDate || !endDate) {
+        return;
+      }
+
+      setIsChecking(true);
+      setMessage(null);
+
+      try {
+        const response = await fetch(availabilityUrl);
+        const body = (await response.json()) as QuoteResponse | { error?: string };
+
+        if (!response.ok) {
+          throw new Error("error" in body ? body.error : "Availability check failed.");
+        }
+
+        if (!cancelled) {
+          setQuote(body as QuoteResponse);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setQuote(null);
+          setMessage({
+            type: "error",
+            text: error instanceof Error ? error.message : "Availability check failed.",
+          });
+        }
+      } finally {
+        if (!cancelled) {
+          setIsChecking(false);
+        }
+      }
+    }
+
+    const timeout = window.setTimeout(() => {
+      void checkAvailability();
+    }, 350);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeout);
+    };
+  }, [availabilityUrl, endDate, startDate]);
+
+  async function handleSubmit() {
+    if (!guestName.trim()) {
+      setMessage({ type: "error", text: "Enter your name before requesting a booking." });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch(
+        `/api/storefront/${orgSlug}/store/${storeSlug}/property/${propertyId}/reservation-request`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            guestName,
+            guestEmail,
+            guestPhone,
+            startDate,
+            endDate,
+            adults: Number(adults) || 1,
+            children: Number(children) || 0,
+            guestNotes,
+          }),
+        },
+      );
+      const body = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        throw new Error(body.error ?? "Request could not be submitted.");
+      }
+
+      setMessage({
+        type: "success",
+        text: "Request submitted. The listing team will confirm availability.",
+      });
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: error instanceof Error ? error.message : "Request could not be submitted.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  const displayCurrency = quote?.currency ?? currency;
 
   return (
-    <div className="bg-surface rounded-2xl border border-border-subtle shadow-lg shadow-stone-200/40 p-6 sm:p-7">
-      {/* Price header */}
-      <div className="flex items-end justify-between mb-6">
+    <div className="bg-surface rounded-2xl border border-border-subtle p-6 shadow-lg shadow-stone-200/40 sm:p-7">
+      <div className="mb-6 flex items-end justify-between">
         <div>
           {price != null ? (
             <>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-3xl font-bold text-stone-900 tabular-nums tracking-tight">
+                <span className="text-3xl font-bold tracking-tight text-stone-900 tabular-nums">
                   {price.toLocaleString()}
                 </span>
-                <span className="text-base font-medium text-stone-500">
-                  {currency}
-                </span>
+                <span className="text-base font-medium text-stone-500">{currency}</span>
               </div>
               <span className="text-sm text-stone-400">/{period}</span>
             </>
@@ -47,107 +189,166 @@ export function BookingCard({
                 Price on request
               </div>
               <span className="text-sm text-stone-400">
-                Contact the listing team for pricing.
+                Submit a request and the listing team will confirm pricing.
               </span>
             </>
           )}
         </div>
         {rating != null ? (
           <div className="flex items-center gap-1.5">
-            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-            <span className="text-sm font-semibold text-stone-700">
-              {rating.toFixed(1)}
-            </span>
-            <span className="text-sm text-stone-400">
-              ({reviewCount ?? 0})
-            </span>
+            <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+            <span className="text-sm font-semibold text-stone-700">{rating.toFixed(1)}</span>
+            <span className="text-sm text-stone-400">({reviewCount ?? 0})</span>
           </div>
         ) : (
           <div className="text-sm font-medium text-stone-400">New listing</div>
         )}
       </div>
 
-      {/* Date inputs */}
-      <div className="grid grid-cols-2 border border-border-subtle rounded-xl overflow-hidden mb-3">
-        <div className="p-3.5 border-r border-border-subtle hover:bg-stone-50 transition-colors cursor-pointer">
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
+      <div className="grid grid-cols-2 overflow-hidden rounded-xl border border-border-subtle">
+        <label className="border-r border-border-subtle p-3.5">
+          <span className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-stone-500">
             Check-in
-          </label>
+          </span>
           <div className="flex items-center gap-2">
-            <CalendarDays className="w-4 h-4 text-stone-400" />
-            <span className="text-sm text-stone-800 font-medium">
-              Mar 15, 2026
-            </span>
+            <CalendarDays className="h-4 w-4 text-stone-400" />
+            <input
+              type="date"
+              value={startDate}
+              onChange={(event) => setStartDate(event.target.value)}
+              className="min-w-0 flex-1 bg-transparent text-sm font-medium text-stone-800 outline-none"
+            />
           </div>
-        </div>
-        <div className="p-3.5 hover:bg-stone-50 transition-colors cursor-pointer">
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
+        </label>
+        <label className="p-3.5">
+          <span className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-stone-500">
             Check-out
-          </label>
+          </span>
           <div className="flex items-center gap-2">
-            <CalendarDays className="w-4 h-4 text-stone-400" />
-            <span className="text-sm text-stone-800 font-medium">
-              Mar 20, 2026
-            </span>
+            <CalendarDays className="h-4 w-4 text-stone-400" />
+            <input
+              type="date"
+              value={endDate}
+              onChange={(event) => setEndDate(event.target.value)}
+              className="min-w-0 flex-1 bg-transparent text-sm font-medium text-stone-800 outline-none"
+            />
           </div>
-        </div>
+        </label>
       </div>
 
-      {/* Guest selector */}
-      <button className="w-full flex items-center justify-between p-3.5 border border-border-subtle rounded-xl mb-5 hover:bg-stone-50 transition-colors">
-        <div>
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
-            Guests
-          </label>
-          <span className="text-sm text-stone-800 font-medium">2 guests</span>
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <label className="rounded-xl border border-border-subtle p-3.5">
+          <span className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-stone-500">
+            Adults
+          </span>
+          <input
+            type="number"
+            min="1"
+            value={adults}
+            onChange={(event) => setAdults(event.target.value)}
+            className="w-full bg-transparent text-sm font-medium text-stone-800 outline-none"
+          />
+        </label>
+        <label className="rounded-xl border border-border-subtle p-3.5">
+          <span className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-stone-500">
+            Children
+          </span>
+          <input
+            type="number"
+            min="0"
+            value={children}
+            onChange={(event) => setChildren(event.target.value)}
+            className="w-full bg-transparent text-sm font-medium text-stone-800 outline-none"
+          />
+        </label>
+      </div>
+
+      <div className="mt-5 space-y-3">
+        <input
+          value={guestName}
+          onChange={(event) => setGuestName(event.target.value)}
+          placeholder="Your name"
+          className="h-11 w-full rounded-xl border border-border-subtle px-3.5 text-sm outline-none focus:border-[var(--storefront-primary)]"
+        />
+        <input
+          value={guestEmail}
+          onChange={(event) => setGuestEmail(event.target.value)}
+          placeholder="Email"
+          className="h-11 w-full rounded-xl border border-border-subtle px-3.5 text-sm outline-none focus:border-[var(--storefront-primary)]"
+        />
+        <input
+          value={guestPhone}
+          onChange={(event) => setGuestPhone(event.target.value)}
+          placeholder="Phone"
+          className="h-11 w-full rounded-xl border border-border-subtle px-3.5 text-sm outline-none focus:border-[var(--storefront-primary)]"
+        />
+        <textarea
+          value={guestNotes}
+          onChange={(event) => setGuestNotes(event.target.value)}
+          placeholder="Message or special requests"
+          rows={3}
+          className="w-full rounded-xl border border-border-subtle px-3.5 py-3 text-sm outline-none focus:border-[var(--storefront-primary)]"
+        />
+      </div>
+
+      {message && (
+        <div
+          className={`mt-4 rounded-xl border px-4 py-3 text-sm ${
+            message.type === "success"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+              : "border-red-200 bg-red-50 text-red-700"
+          }`}
+        >
+          {message.text}
         </div>
-        <ChevronDown className="w-4 h-4 text-stone-400" />
+      )}
+
+      <button
+        className="mt-5 h-13 w-full rounded-xl bg-[var(--storefront-primary)] text-base font-semibold text-[var(--storefront-primary-foreground)] transition-all hover:bg-[var(--storefront-primary-hover)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+        disabled={isSubmitting || isChecking || quote?.available === false}
+        onClick={() => void handleSubmit()}
+      >
+        {isSubmitting
+          ? "Submitting..."
+          : quote?.available === false
+            ? "Dates unavailable"
+            : "Request booking"}
       </button>
 
-      {/* Reserve button */}
-      <button className="w-full h-13 rounded-xl bg-[var(--storefront-primary)] text-[var(--storefront-primary-foreground)] font-semibold text-base hover:bg-[var(--storefront-primary-hover)] active:scale-[0.98] transition-all">
-        {price != null ? "Reserve" : "Request availability"}
-      </button>
-
-      <p className="text-center text-sm text-stone-400 mt-3">
-        {price != null ? "You won&apos;t be charged yet" : "Pricing is confirmed offline"}
+      <p className="mt-3 text-center text-sm text-stone-400">
+        You will not be charged. The listing team will confirm your request.
       </p>
 
-      {/* Price breakdown */}
-      {price != null ? (
-        <div className="mt-6 pt-5 border-t border-border-subtle space-y-3">
-          <div className="flex justify-between text-sm">
-            <span className="text-stone-600 underline underline-offset-2 decoration-stone-300 cursor-help">
-              {price.toLocaleString()} {currency} x {nights} nights
-            </span>
-            <span className="text-stone-800 font-medium tabular-nums">
-              {subtotal.toLocaleString()} {currency}
-            </span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-stone-600 underline underline-offset-2 decoration-stone-300 cursor-help">
-              Cleaning fee
-            </span>
-            <span className="text-stone-800 font-medium tabular-nums">
-              {cleaningFee.toLocaleString()} {currency}
-            </span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-stone-600 underline underline-offset-2 decoration-stone-300 cursor-help">
-              Service fee
-            </span>
-            <span className="text-stone-800 font-medium tabular-nums">
-              {serviceFee.toLocaleString()} {currency}
-            </span>
-          </div>
-          <div className="flex justify-between pt-3 border-t border-border-subtle">
-            <span className="text-base font-bold text-stone-900">Total</span>
+      {quote ? (
+        <div className="mt-6 space-y-3 border-t border-border-subtle pt-5">
+          <BreakdownRow
+            label={`${price?.toLocaleString() ?? "Rate"} ${displayCurrency} x ${quote.quote.nights} nights`}
+            value={money(quote.quote.nightlySubtotal, displayCurrency)}
+          />
+          <BreakdownRow label="Fees" value={money(quote.quote.feesTotal, displayCurrency)} />
+          <BreakdownRow label="Taxes" value={money(quote.quote.taxTotal, displayCurrency)} />
+          {quote.quote.discountTotal > 0 && (
+            <BreakdownRow label="Discounts" value={`-${money(quote.quote.discountTotal, displayCurrency)}`} />
+          )}
+          <div className="flex justify-between border-t border-border-subtle pt-3">
+            <span className="text-base font-bold text-stone-900">Estimated total</span>
             <span className="text-base font-bold text-stone-900 tabular-nums">
-              {total.toLocaleString()} {currency}
+              {money(quote.quote.totalAmount, displayCurrency)}
             </span>
           </div>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function BreakdownRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between text-sm">
+      <span className="text-stone-600 underline decoration-stone-300 underline-offset-2">
+        {label}
+      </span>
+      <span className="font-medium tabular-nums text-stone-800">{value}</span>
     </div>
   );
 }

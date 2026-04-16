@@ -241,6 +241,9 @@ export default async function StorefrontPropertyDetailPage({ params }: PageProps
           <div className="w-full shrink-0 lg:w-[400px]">
             <div className="lg:sticky lg:top-[96px]">
               <BookingCard
+                orgSlug={storefront.orgSlug}
+                storeSlug={storefront.slug}
+                propertyId={property.id}
                 price={property.price}
                 currency={property.currency}
                 period={property.period}
