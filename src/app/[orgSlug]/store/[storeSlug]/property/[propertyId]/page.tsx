@@ -104,7 +104,7 @@ export default async function StorefrontPropertyDetailPage({ params }: PageProps
                   {property.type}
                 </span>
                 {property.isFeatured ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[var(--storefront-primary)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[var(--storefront-primary-foreground)]">
+                  <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[var(--storefront-primary-foreground)] [background:var(--storefront-primary-fill)]">
                     <svg viewBox="0 0 12 12" fill="currentColor" className="h-2.5 w-2.5">
                       <path d="M6 0l1.76 3.77L12 4.38 8.91 7.23 9.71 12 6 9.97 2.29 12l.8-4.77L0 4.38l4.24-.61z" />
                     </svg>

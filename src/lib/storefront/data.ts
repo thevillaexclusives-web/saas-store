@@ -461,7 +461,7 @@ async function fetchBrandKitById(id: string | null | undefined) {
       "brand_kits",
       new URLSearchParams({
         select:
-          "id,brand_name,tagline,primary_color,accent_color,dark_color,light_color,neutral_color,typography_preset,style_preset,corner_style,settings,brand_assets(kind,file_path)",
+          "id,brand_name,tagline,primary_color,accent_color,dark_color,light_color,neutral_color,gradient_from,gradient_to,typography_preset,style_preset,corner_style,settings,brand_assets(kind,file_path)",
         id: `eq.${id}`,
         status: "neq.archived",
         limit: "1",

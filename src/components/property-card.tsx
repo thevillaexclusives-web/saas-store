@@ -54,7 +54,7 @@ export function PropertyCard({ property, index, orgSlug, storeSlug }: PropertyCa
         {/* Featured badge */}
         {property.isFeatured && (
           <div className="absolute bottom-3.5 left-3.5">
-            <span className="inline-flex items-center gap-1 bg-[var(--storefront-primary)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[var(--storefront-primary-foreground)] shadow-md [border-radius:var(--storefront-radius-button)]">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[var(--storefront-primary-foreground)] shadow-md [background:var(--storefront-primary-fill)] [border-radius:var(--storefront-radius-button)]">
               <svg
                 viewBox="0 0 12 12"
                 fill="currentColor"

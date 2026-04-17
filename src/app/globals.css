@@ -42,6 +42,8 @@
   --background: #f8f7f5;
   --foreground: #1c1917;
   --storefront-primary: #96693a;
+  --storefront-primary-fill: #96693a;
+  --storefront-primary-hover-fill: #7a5232;
   --storefront-primary-foreground: #ffffff;
   --storefront-primary-hover: #7a5232;
   --storefront-primary-active: #5e3e2b;

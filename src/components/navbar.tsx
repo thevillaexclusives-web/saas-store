@@ -62,7 +62,7 @@ export function Navbar({
                 />
               </div>
             ) : showFallbackIcon ? (
-              <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden bg-[var(--storefront-primary)] shadow-sm [border-radius:var(--storefront-radius-card)]">
+              <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden [background:var(--storefront-primary-fill)] shadow-sm [border-radius:var(--storefront-radius-card)]">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -105,7 +105,7 @@ export function Navbar({
                 className={cn(
                   "px-5 py-2 text-sm font-medium rounded-full transition-all",
                   i === 2
-                    ? "bg-[var(--storefront-primary)] text-[var(--storefront-primary-foreground)] shadow-sm"
+                    ? "[background:var(--storefront-primary-fill)] text-[var(--storefront-primary-foreground)] shadow-sm"
                     : "text-stone-500 hover:text-[var(--storefront-primary)]"
                 )}
               >
@@ -124,7 +124,7 @@ export function Navbar({
 
             <a
               href={`${process.env.NEXT_PUBLIC_PLATFORM_URL}/login`}
-              className="inline-flex h-10 items-center bg-[var(--storefront-primary)] px-6 text-sm font-semibold text-[var(--storefront-primary-foreground)] transition-all hover:bg-[var(--storefront-primary-hover)] active:scale-[0.97] [border-radius:var(--storefront-radius-button)]"
+              className="inline-flex h-10 items-center px-6 text-sm font-semibold text-[var(--storefront-primary-foreground)] transition-all [background:var(--storefront-primary-fill)] hover:[background:var(--storefront-primary-hover-fill)] active:scale-[0.97] [border-radius:var(--storefront-radius-button)]"
             >
               Login
             </a>

@@ -37,7 +37,7 @@ export function StorefrontFooter({ branding }: { branding?: StorefrontBranding }
                 />
               </div>
             ) : showFallbackIcon ? (
-              <div className="relative flex h-6 w-6 items-center justify-center overflow-hidden bg-[var(--storefront-primary)] [border-radius:var(--storefront-radius-card)]">
+              <div className="relative flex h-6 w-6 items-center justify-center overflow-hidden [background:var(--storefront-primary-fill)] [border-radius:var(--storefront-radius-card)]">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"

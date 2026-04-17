@@ -46,7 +46,7 @@ export function CategoryBar({
                 className={cn(
                   "flex items-center gap-2.5 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all shrink-0",
                   isActive
-                    ? "bg-[var(--storefront-primary)] text-[var(--storefront-primary-foreground)] shadow-md"
+                    ? "[background:var(--storefront-primary-fill)] text-[var(--storefront-primary-foreground)] shadow-md"
                     : "bg-[var(--storefront-secondary-surface-strong)] text-stone-600 hover:bg-[var(--storefront-primary-soft)] hover:text-[var(--storefront-primary)]"
                 )}
               >

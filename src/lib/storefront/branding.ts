@@ -8,11 +8,18 @@ const DEFAULT_SECONDARY_COLOR = "#ffffff";
 const DEFAULT_NEUTRAL_COLOR = "#57534e";
 const DEFAULT_BRAND_NAME = "VillaHub";
 const DEFAULT_BRAND_DISPLAY = "logo_and_name";
+const DEFAULT_PRIMARY_FILL_STYLE = "solid";
+
+function isHexColor(value: string | null | undefined) {
+  const trimmed = value?.trim() ?? "";
+  const normalized = trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
+  return /^#[0-9a-fA-F]{6}$/.test(normalized);
+}
 
 function normalizeHexColor(value: string | null | undefined, fallback: string) {
   const trimmed = value?.trim() ?? "";
   const normalized = trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
-  return /^#[0-9a-fA-F]{6}$/.test(normalized) ? normalized.toLowerCase() : fallback;
+  return isHexColor(value) ? normalized.toLowerCase() : fallback;
 }
 
 function toRgb(hex: string) {
@@ -56,6 +63,16 @@ export function normalizeStorefrontBranding(
     branding?.colors?.light ?? branding?.secondaryColor,
     DEFAULT_SECONDARY_COLOR,
   );
+  const gradientFrom = isHexColor(branding?.gradient?.from)
+    ? normalizeHexColor(branding?.gradient?.from, primaryColor)
+    : null;
+  const gradientTo = isHexColor(branding?.gradient?.to)
+    ? normalizeHexColor(branding?.gradient?.to, primaryColor)
+    : null;
+  const primaryFillStyle =
+    branding?.primaryFillStyle === "gradient" && gradientFrom && gradientTo
+      ? "gradient"
+      : DEFAULT_PRIMARY_FILL_STYLE;
   const primaryLogo = branding?.logos?.primary?.trim() || branding?.logoUrl?.trim() || null;
   const horizontalLogo = branding?.logos?.horizontal?.trim() || null;
   const iconLogo = branding?.logos?.icon?.trim() || null;
@@ -70,6 +87,11 @@ export function normalizeStorefrontBranding(
     logoUrl: horizontalLogo || primaryLogo || iconLogo,
     primaryColor,
     secondaryColor: lightColor,
+    primaryFillStyle,
+    gradient: {
+      from: gradientFrom,
+      to: gradientTo,
+    },
     brandDisplay:
       branding?.brandDisplay === "name_only" ||
       branding?.brandDisplay === "logo_only" ||
@@ -111,6 +133,16 @@ export function storefrontBrandStyle(branding?: Partial<StorefrontBranding> | nu
   const normalized = normalizeStorefrontBranding(branding);
   const primaryHover = mix(normalized.primaryColor, "#000000", 0.12);
   const primaryActive = mix(normalized.primaryColor, "#000000", 0.2);
+  const hasGradientFill =
+    normalized.primaryFillStyle === "gradient" &&
+    Boolean(normalized.gradient.from) &&
+    Boolean(normalized.gradient.to);
+  const primaryFill = hasGradientFill
+    ? `linear-gradient(135deg, ${normalized.gradient.from}, ${normalized.gradient.to})`
+    : normalized.primaryColor;
+  const primaryHoverFill = hasGradientFill
+    ? `linear-gradient(135deg, ${mix(normalized.gradient.from!, "#000000", 0.08)}, ${mix(normalized.gradient.to!, "#000000", 0.14)})`
+    : primaryHover;
   const accentHover = mix(normalized.colors.accent, "#000000", 0.12);
   const soft = withAlpha(normalized.primaryColor, 0.12);
   const softStrong = withAlpha(normalized.primaryColor, 0.18);
@@ -127,6 +159,8 @@ export function storefrontBrandStyle(branding?: Partial<StorefrontBranding> | nu
 
   return {
     "--storefront-primary": normalized.primaryColor,
+    "--storefront-primary-fill": primaryFill,
+    "--storefront-primary-hover-fill": primaryHoverFill,
     "--storefront-primary-foreground": textColor(normalized.primaryColor),
     "--storefront-primary-hover": primaryHover,
     "--storefront-primary-active": primaryActive,

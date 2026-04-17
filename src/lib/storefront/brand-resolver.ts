@@ -21,6 +21,8 @@ export interface RawBrandKit {
   dark_color: string | null;
   light_color: string | null;
   neutral_color: string | null;
+  gradient_from: string | null;
+  gradient_to: string | null;
   typography_preset: string | null;
   style_preset: string | null;
   corner_style: string | null;
@@ -49,6 +51,17 @@ function brandDisplayFromSettings(
   return value === "name_only" || value === "logo_only" || value === "logo_and_name"
     ? value
     : null;
+}
+
+function primaryFillStyleFromSettings(settings: Record<string, unknown> | null | undefined) {
+  const value =
+    typeof settings?.primary_fill_style === "string"
+      ? settings.primary_fill_style
+      : typeof settings?.primary_fill === "string"
+        ? settings.primary_fill
+        : null;
+
+  return value === "gradient" ? "gradient" : "solid";
 }
 
 function assetUrl(
@@ -111,6 +124,13 @@ export function resolveStorefrontBranding(input: {
     brandDisplayFromSettings(input.brandKit?.settings) ??
     brandDisplayFromSettings(input.organization.settings) ??
     "logo_and_name";
+  const primaryFillStyle =
+    input.brandKit &&
+    primaryFillStyleFromSettings(input.brandKit.settings) === "gradient" &&
+    input.brandKit.gradient_from &&
+    input.brandKit.gradient_to
+      ? "gradient"
+      : "solid";
 
   return {
     name: input.brandKit?.brand_name || input.organization.name,
@@ -120,6 +140,11 @@ export function resolveStorefrontBranding(input: {
       input.brandKit?.primary_color ?? input.organization.primary_color ?? "#96693a",
     secondaryColor:
       input.brandKit?.light_color ?? input.organization.secondary_color ?? "#ffffff",
+    primaryFillStyle,
+    gradient: {
+      from: input.brandKit?.gradient_from ?? null,
+      to: input.brandKit?.gradient_to ?? null,
+    },
     brandDisplay,
     logos: {
       primary: primaryLogo || legacyLogoUrl,

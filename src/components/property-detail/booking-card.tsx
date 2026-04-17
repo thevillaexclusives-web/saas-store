@@ -304,7 +304,7 @@ export function BookingCard({
       )}
 
       <button
-        className="mt-5 h-13 w-full bg-[var(--storefront-primary)] text-base font-semibold text-[var(--storefront-primary-foreground)] transition-all hover:bg-[var(--storefront-primary-hover)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 [border-radius:var(--storefront-radius-button)]"
+        className="mt-5 h-13 w-full text-base font-semibold text-[var(--storefront-primary-foreground)] transition-all [background:var(--storefront-primary-fill)] hover:[background:var(--storefront-primary-hover-fill)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 [border-radius:var(--storefront-radius-button)]"
         disabled={isSubmitting || isChecking || quote?.available === false}
         onClick={() => void handleSubmit()}
       >

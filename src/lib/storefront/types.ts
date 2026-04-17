@@ -1,5 +1,6 @@
 export type StorefrontBrandDisplayMode = "logo_and_name" | "name_only" | "logo_only";
 export type StorefrontCornerStyle = "sharp" | "soft" | "rounded";
+export type StorefrontPrimaryFillStyle = "solid" | "gradient";
 
 export interface Storefront {
   id: string;
@@ -14,6 +15,11 @@ export interface StorefrontBranding {
   logoUrl: string | null;
   primaryColor: string;
   secondaryColor: string;
+  primaryFillStyle: StorefrontPrimaryFillStyle;
+  gradient: {
+    from: string | null;
+    to: string | null;
+  };
   brandDisplay: StorefrontBrandDisplayMode;
   logos: {
     primary: string | null;
