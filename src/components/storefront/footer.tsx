@@ -4,9 +4,12 @@ import type { StorefrontBranding } from "@/lib/storefront/types";
 
 export function StorefrontFooter({ branding }: { branding?: StorefrontBranding }) {
   const brand = normalizeStorefrontBranding(branding);
-  const showLogo = brand.brandDisplay !== "name_only" && Boolean(brand.logoUrl);
-  const showFallbackIcon = brand.brandDisplay === "logo_and_name" && !brand.logoUrl;
-  const showName = brand.brandDisplay !== "logo_only" || !brand.logoUrl;
+  const logoUrl = brand.logos.reversed || brand.logos.horizontal || brand.logos.primary || brand.logoUrl;
+  const iconUrl = brand.logos.icon || brand.logos.favicon;
+  const showLogo = brand.brandDisplay !== "name_only" && Boolean(logoUrl);
+  const showIcon = brand.brandDisplay !== "name_only" && !showLogo && Boolean(iconUrl);
+  const showFallbackIcon = brand.brandDisplay === "logo_and_name" && !showLogo && !showIcon;
+  const showName = brand.brandDisplay !== "logo_only" || (!logoUrl && !iconUrl);
 
   return (
     <footer className="border-t border-border-subtle bg-[var(--storefront-secondary-surface)]">
@@ -14,17 +17,27 @@ export function StorefrontFooter({ branding }: { branding?: StorefrontBranding }
         <div className="flex flex-col items-center justify-between gap-4 text-sm text-stone-500 sm:flex-row">
           <div className="flex items-center gap-2">
             {showLogo ? (
-              <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden">
+              <div className="relative flex h-9 w-28 shrink-0 items-center justify-center overflow-hidden">
                 <Image
-                  src={brand.logoUrl!}
+                  src={logoUrl!}
                   alt={`${brand.name} logo`}
                   fill
-                  sizes="36px"
+                  sizes="112px"
+                  className="object-contain"
+                />
+              </div>
+            ) : showIcon ? (
+              <div className="relative flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
+                <Image
+                  src={iconUrl!}
+                  alt={`${brand.name} icon`}
+                  fill
+                  sizes="24px"
                   className="object-contain"
                 />
               </div>
             ) : showFallbackIcon ? (
-              <div className="relative flex h-6 w-6 items-center justify-center overflow-hidden rounded-lg bg-[var(--storefront-primary)]">
+              <div className="relative flex h-6 w-6 items-center justify-center overflow-hidden bg-[var(--storefront-primary)] [border-radius:var(--storefront-radius-card)]">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"

@@ -1,4 +1,5 @@
 export type StorefrontBrandDisplayMode = "logo_and_name" | "name_only" | "logo_only";
+export type StorefrontCornerStyle = "sharp" | "soft" | "rounded";
 
 export interface Storefront {
   id: string;
@@ -9,10 +10,30 @@ export interface Storefront {
 
 export interface StorefrontBranding {
   name: string;
+  tagline: string | null;
   logoUrl: string | null;
   primaryColor: string;
   secondaryColor: string;
   brandDisplay: StorefrontBrandDisplayMode;
+  logos: {
+    primary: string | null;
+    horizontal: string | null;
+    icon: string | null;
+    reversed: string | null;
+    favicon: string | null;
+    pattern: string | null;
+    socialImage: string | null;
+  };
+  colors: {
+    primary: string;
+    accent: string;
+    dark: string;
+    light: string;
+    neutral: string;
+  };
+  typographyPreset: "modern_sans" | "editorial_serif" | "clean_sans";
+  stylePreset: "modern_luxury" | "editorial" | "minimal";
+  cornerStyle: StorefrontCornerStyle;
 }
 
 export interface StorefrontCategory {

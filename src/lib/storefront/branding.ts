@@ -2,7 +2,10 @@ import type { CSSProperties } from "react";
 import type { StorefrontBranding } from "@/lib/storefront/types";
 
 const DEFAULT_PRIMARY_COLOR = "#96693a";
+const DEFAULT_ACCENT_COLOR = "#38b8bc";
+const DEFAULT_DARK_COLOR = "#111111";
 const DEFAULT_SECONDARY_COLOR = "#ffffff";
+const DEFAULT_NEUTRAL_COLOR = "#57534e";
 const DEFAULT_BRAND_NAME = "VillaHub";
 const DEFAULT_BRAND_DISPLAY = "logo_and_name";
 
@@ -45,17 +48,62 @@ function textColor(hex: string) {
 export function normalizeStorefrontBranding(
   branding?: Partial<StorefrontBranding> | null,
 ): StorefrontBranding {
+  const primaryColor = normalizeHexColor(
+    branding?.colors?.primary ?? branding?.primaryColor,
+    DEFAULT_PRIMARY_COLOR,
+  );
+  const lightColor = normalizeHexColor(
+    branding?.colors?.light ?? branding?.secondaryColor,
+    DEFAULT_SECONDARY_COLOR,
+  );
+  const primaryLogo = branding?.logos?.primary?.trim() || branding?.logoUrl?.trim() || null;
+  const horizontalLogo = branding?.logos?.horizontal?.trim() || null;
+  const iconLogo = branding?.logos?.icon?.trim() || null;
+  const reversedLogo = branding?.logos?.reversed?.trim() || null;
+  const favicon = branding?.logos?.favicon?.trim() || null;
+  const pattern = branding?.logos?.pattern?.trim() || null;
+  const socialImage = branding?.logos?.socialImage?.trim() || null;
+
   return {
     name: branding?.name?.trim() || DEFAULT_BRAND_NAME,
-    logoUrl: branding?.logoUrl?.trim() || null,
-    primaryColor: normalizeHexColor(branding?.primaryColor, DEFAULT_PRIMARY_COLOR),
-    secondaryColor: normalizeHexColor(branding?.secondaryColor, DEFAULT_SECONDARY_COLOR),
+    tagline: branding?.tagline?.trim() || null,
+    logoUrl: horizontalLogo || primaryLogo || iconLogo,
+    primaryColor,
+    secondaryColor: lightColor,
     brandDisplay:
       branding?.brandDisplay === "name_only" ||
       branding?.brandDisplay === "logo_only" ||
       branding?.brandDisplay === "logo_and_name"
         ? branding.brandDisplay
         : DEFAULT_BRAND_DISPLAY,
+    logos: {
+      primary: primaryLogo,
+      horizontal: horizontalLogo,
+      icon: iconLogo,
+      reversed: reversedLogo,
+      favicon,
+      pattern,
+      socialImage,
+    },
+    colors: {
+      primary: primaryColor,
+      accent: normalizeHexColor(branding?.colors?.accent, DEFAULT_ACCENT_COLOR),
+      dark: normalizeHexColor(branding?.colors?.dark, DEFAULT_DARK_COLOR),
+      light: lightColor,
+      neutral: normalizeHexColor(branding?.colors?.neutral, DEFAULT_NEUTRAL_COLOR),
+    },
+    typographyPreset:
+      branding?.typographyPreset === "editorial_serif" || branding?.typographyPreset === "clean_sans"
+        ? branding.typographyPreset
+        : "modern_sans",
+    stylePreset:
+      branding?.stylePreset === "editorial" || branding?.stylePreset === "minimal"
+        ? branding.stylePreset
+        : "modern_luxury",
+    cornerStyle:
+      branding?.cornerStyle === "sharp" || branding?.cornerStyle === "rounded"
+        ? branding.cornerStyle
+        : "soft",
   };
 }
 
@@ -63,11 +111,19 @@ export function storefrontBrandStyle(branding?: Partial<StorefrontBranding> | nu
   const normalized = normalizeStorefrontBranding(branding);
   const primaryHover = mix(normalized.primaryColor, "#000000", 0.12);
   const primaryActive = mix(normalized.primaryColor, "#000000", 0.2);
+  const accentHover = mix(normalized.colors.accent, "#000000", 0.12);
   const soft = withAlpha(normalized.primaryColor, 0.12);
   const softStrong = withAlpha(normalized.primaryColor, 0.18);
   const border = withAlpha(normalized.primaryColor, 0.28);
   const secondarySurface = mix(normalized.secondaryColor, "#ffffff", 0.88);
   const secondarySurfaceStrong = mix(normalized.secondaryColor, "#ffffff", 0.78);
+  const cardRadius =
+    normalized.cornerStyle === "sharp"
+      ? "0.5rem"
+      : normalized.cornerStyle === "rounded"
+        ? "1.75rem"
+        : "1.25rem";
+  const buttonRadius = normalized.cornerStyle === "rounded" ? "9999px" : cardRadius;
 
   return {
     "--storefront-primary": normalized.primaryColor,
@@ -77,9 +133,21 @@ export function storefrontBrandStyle(branding?: Partial<StorefrontBranding> | nu
     "--storefront-primary-soft": soft,
     "--storefront-primary-soft-strong": softStrong,
     "--storefront-primary-border": border,
+    "--storefront-accent": normalized.colors.accent,
+    "--storefront-accent-foreground": textColor(normalized.colors.accent),
+    "--storefront-accent-hover": accentHover,
+    "--storefront-dark": normalized.colors.dark,
+    "--storefront-light": normalized.colors.light,
+    "--storefront-neutral": normalized.colors.neutral,
     "--storefront-secondary": normalized.secondaryColor,
     "--storefront-secondary-foreground": textColor(normalized.secondaryColor),
     "--storefront-secondary-surface": secondarySurface,
     "--storefront-secondary-surface-strong": secondarySurfaceStrong,
+    "--storefront-surface": normalized.colors.light,
+    "--storefront-muted": secondarySurface,
+    "--storefront-border": withAlpha(normalized.colors.neutral, 0.2),
+    "--storefront-radius-card": cardRadius,
+    "--storefront-radius-button": buttonRadius,
+    "--storefront-pattern-url": normalized.logos.pattern ? `url(${normalized.logos.pattern})` : "none",
   } as CSSProperties;
 }

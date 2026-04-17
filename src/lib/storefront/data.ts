@@ -10,15 +10,21 @@ import type {
   StorefrontProperty,
   StorefrontPropertyDetailData,
 } from "@/lib/storefront/types";
+import {
+  resolveStorefrontBranding,
+  type RawBrandKit,
+} from "@/lib/storefront/brand-resolver";
 import type { StorefrontTarget } from "@/lib/storefront/resolver";
 
 const PROPERTY_UPLOAD_BUCKET = "platform-uploads";
+const BRAND_ASSETS_BUCKET = "brand-assets";
 
 interface RawStorefront {
   id: string;
   org_id: string;
   name: string;
   slug: string;
+  brand_kit_id: string | null;
 }
 
 interface RawOrganization {
@@ -28,6 +34,7 @@ interface RawOrganization {
   logo_url: string | null;
   primary_color: string | null;
   secondary_color: string | null;
+  default_brand_kit_id: string | null;
   settings: Record<string, unknown> | null;
 }
 
@@ -425,7 +432,7 @@ async function fetchRows<T>(table: string, params: URLSearchParams) {
 
 async function fetchOrganizationBySlug(slug: string) {
   const params = new URLSearchParams({
-    select: "id,name,slug,logo_url,primary_color,secondary_color,settings",
+    select: "id,name,slug,logo_url,primary_color,secondary_color,default_brand_kit_id,settings",
     slug: `eq.${slug}`,
     limit: "1",
   });
@@ -435,13 +442,36 @@ async function fetchOrganizationBySlug(slug: string) {
 
 async function fetchStorefrontByOrgAndSlug(orgId: string, slug: string) {
   const params = new URLSearchParams({
-    select: "id,org_id,name,slug",
+    select: "id,org_id,name,slug,brand_kit_id",
     org_id: `eq.${orgId}`,
     slug: `eq.${slug}`,
     limit: "1",
   });
   const [storefront] = await fetchRows<RawStorefront>("storefronts", params);
   return storefront ?? null;
+}
+
+async function fetchBrandKitById(id: string | null | undefined) {
+  if (!id) {
+    return null;
+  }
+
+  try {
+    const [brandKit] = await fetchRows<RawBrandKit>(
+      "brand_kits",
+      new URLSearchParams({
+        select:
+          "id,brand_name,tagline,primary_color,accent_color,dark_color,light_color,neutral_color,typography_preset,style_preset,corner_style,settings,brand_assets(kind,file_path)",
+        id: `eq.${id}`,
+        status: "neq.archived",
+        limit: "1",
+      }),
+    );
+
+    return brandKit ?? null;
+  } catch {
+    return null;
+  }
 }
 
 async function fetchStorefrontProperties(storefrontId: string) {
@@ -607,18 +637,15 @@ const getStorefrontListingDataByTarget = cache(
       slug: storefrontRecord.slug,
       orgSlug: organization.slug,
     };
-    const branding: StorefrontBranding = {
-      name: organization.name,
-      logoUrl: organization.logo_url ?? null,
-      primaryColor: organization.primary_color ?? "#96693a",
-      secondaryColor: organization.secondary_color ?? "#ffffff",
-      brandDisplay:
-        organization.settings?.storefront_brand_display === "name_only" ||
-        organization.settings?.storefront_brand_display === "logo_only" ||
-        organization.settings?.storefront_brand_display === "logo_and_name"
-          ? organization.settings.storefront_brand_display
-          : "logo_and_name",
-    };
+    const brandKit =
+      (await fetchBrandKitById(storefrontRecord.brand_kit_id)) ??
+      (await fetchBrandKitById(organization.default_brand_kit_id));
+    const branding: StorefrontBranding = resolveStorefrontBranding({
+      organization,
+      brandKit,
+      supabaseUrl: getSupabaseUrl(),
+      brandAssetsBucket: BRAND_ASSETS_BUCKET,
+    });
 
     const propertyRows = await fetchStorefrontProperties(storefront.id);
     const lookups = await fetchLookupData(propertyRows);

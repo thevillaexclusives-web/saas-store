@@ -28,9 +28,12 @@ export function Navbar({
   branding?: StorefrontBranding;
 }) {
   const brand = normalizeStorefrontBranding(branding);
-  const showLogo = brand.brandDisplay !== "name_only" && Boolean(brand.logoUrl);
-  const showFallbackIcon = brand.brandDisplay === "logo_and_name" && !brand.logoUrl;
-  const showName = brand.brandDisplay !== "logo_only" || !brand.logoUrl;
+  const logoUrl = brand.logos.horizontal || brand.logos.primary || brand.logoUrl;
+  const iconUrl = brand.logos.icon || brand.logos.favicon;
+  const showLogo = brand.brandDisplay !== "name_only" && Boolean(logoUrl);
+  const showIcon = brand.brandDisplay !== "name_only" && !showLogo && Boolean(iconUrl);
+  const showFallbackIcon = brand.brandDisplay === "logo_and_name" && !showLogo && !showIcon;
+  const showName = brand.brandDisplay !== "logo_only" || (!logoUrl && !iconUrl);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border-subtle bg-[var(--storefront-secondary-surface)] backdrop-blur-xl">
@@ -39,17 +42,27 @@ export function Navbar({
           {/* Logo */}
           <Link href={homeHref} className="flex items-center gap-2 shrink-0">
             {showLogo ? (
-              <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden sm:h-16 sm:w-16">
+              <div className="relative flex h-14 w-32 shrink-0 items-center justify-center overflow-hidden sm:h-16 sm:w-40">
                 <Image
-                  src={brand.logoUrl!}
+                  src={logoUrl!}
                   alt={`${brand.name} logo`}
                   fill
-                  sizes="(max-width: 640px) 56px, 64px"
+                  sizes="(max-width: 640px) 120px, 160px"
+                  className="object-contain"
+                />
+              </div>
+            ) : showIcon ? (
+              <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden">
+                <Image
+                  src={iconUrl!}
+                  alt={`${brand.name} icon`}
+                  fill
+                  sizes="36px"
                   className="object-contain"
                 />
               </div>
             ) : showFallbackIcon ? (
-              <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-[var(--storefront-primary)] shadow-sm">
+              <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden bg-[var(--storefront-primary)] shadow-sm [border-radius:var(--storefront-radius-card)]">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -111,7 +124,7 @@ export function Navbar({
 
             <a
               href={`${process.env.NEXT_PUBLIC_PLATFORM_URL}/login`}
-              className="inline-flex h-10 items-center rounded-full bg-[var(--storefront-primary)] px-6 text-sm font-semibold text-[var(--storefront-primary-foreground)] transition-all hover:bg-[var(--storefront-primary-hover)] active:scale-[0.97]"
+              className="inline-flex h-10 items-center bg-[var(--storefront-primary)] px-6 text-sm font-semibold text-[var(--storefront-primary-foreground)] transition-all hover:bg-[var(--storefront-primary-hover)] active:scale-[0.97] [border-radius:var(--storefront-radius-button)]"
             >
               Login
             </a>

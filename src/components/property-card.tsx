@@ -22,7 +22,7 @@ export function PropertyCard({ property, index, orgSlug, storeSlug }: PropertyCa
     <Link
       href={storefrontPropertyPath({ orgSlug, storeSlug, propertyId: property.id })}
       className={cn(
-        "property-card group relative block bg-surface rounded-2xl overflow-hidden border border-border-subtle/60 hover:border-stone-200 hover:shadow-lg hover:shadow-stone-200/50 transition-all duration-300 card-enter",
+        "property-card group relative block overflow-hidden border border-border-subtle/60 bg-surface transition-all duration-300 hover:border-stone-200 hover:shadow-lg hover:shadow-stone-200/50 card-enter [border-radius:var(--storefront-radius-card)]",
         staggerClass
       )}
     >
@@ -41,20 +41,20 @@ export function PropertyCard({ property, index, orgSlug, storeSlug }: PropertyCa
 
         {/* Type badge */}
         <div className="absolute top-3.5 left-3.5">
-          <span className="inline-flex px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-xs font-semibold text-stone-700 uppercase tracking-wider shadow-sm">
+          <span className="inline-flex bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-stone-700 shadow-sm backdrop-blur-md [border-radius:var(--storefront-radius-button)]">
             {property.type}
           </span>
         </div>
 
         {/* Wishlist button */}
-        <button className="absolute top-3.5 right-3.5 w-9 h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-md text-stone-400 hover:text-rose-500 hover:bg-white transition-all shadow-sm opacity-0 group-hover:opacity-100">
+        <button className="absolute right-3.5 top-3.5 flex h-9 w-9 items-center justify-center bg-white/90 text-stone-400 opacity-0 shadow-sm backdrop-blur-md transition-all hover:bg-white hover:text-rose-500 group-hover:opacity-100 [border-radius:var(--storefront-radius-button)]">
           <Heart className="w-4 h-4" />
         </button>
 
         {/* Featured badge */}
         {property.isFeatured && (
           <div className="absolute bottom-3.5 left-3.5">
-            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--storefront-primary)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[var(--storefront-primary-foreground)] shadow-md">
+            <span className="inline-flex items-center gap-1 bg-[var(--storefront-primary)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[var(--storefront-primary-foreground)] shadow-md [border-radius:var(--storefront-radius-button)]">
               <svg
                 viewBox="0 0 12 12"
                 fill="currentColor"

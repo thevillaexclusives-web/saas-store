@@ -170,7 +170,7 @@ export function BookingCard({
   const displayCurrency = quote?.currency ?? currency;
 
   return (
-    <div className="bg-surface rounded-2xl border border-border-subtle p-6 shadow-lg shadow-stone-200/40 sm:p-7">
+    <div className="border border-border-subtle bg-surface p-6 shadow-lg shadow-stone-200/40 sm:p-7 [border-radius:var(--storefront-radius-card)]">
       <div className="mb-6 flex items-end justify-between">
         <div>
           {price != null ? (
@@ -304,7 +304,7 @@ export function BookingCard({
       )}
 
       <button
-        className="mt-5 h-13 w-full rounded-xl bg-[var(--storefront-primary)] text-base font-semibold text-[var(--storefront-primary-foreground)] transition-all hover:bg-[var(--storefront-primary-hover)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-5 h-13 w-full bg-[var(--storefront-primary)] text-base font-semibold text-[var(--storefront-primary-foreground)] transition-all hover:bg-[var(--storefront-primary-hover)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 [border-radius:var(--storefront-radius-button)]"
         disabled={isSubmitting || isChecking || quote?.available === false}
         onClick={() => void handleSubmit()}
       >

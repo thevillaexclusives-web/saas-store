@@ -35,6 +35,7 @@ export function StorefrontListingPage({
       className="min-h-screen bg-surface-muted"
       style={storefrontBrandStyle(branding)}
     >
+      <div className="pointer-events-none fixed inset-0 opacity-[0.035] [background-image:var(--storefront-pattern-url)] [background-size:160px_auto]" />
       <Navbar
         homeHref={storefrontPath({ orgSlug: storefront.orgSlug, storeSlug: storefront.slug })}
         branding={branding}
